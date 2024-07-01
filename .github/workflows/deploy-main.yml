@@ -1,0 +1,30 @@
+---
+name: Deploy main
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches: [ main ]
+
+jobs:
+
+  sync_develop:
+    uses: santander-group-wealth-ng/wmi-awslz-actions-workflows/.github/workflows/merge-sync.yaml@main
+    with:
+      base-branch: main
+      version-file: pom.xml
+      destination-branch: development
+    secrets: inherit
+
+  CI-CD-main:
+    uses: santander-group-wealth-ng/wmi-awslz-actions-workflows/.github/workflows/deploy-helm-maven-main-FB.yml@main
+    if: github.event.pull_request.merged == true # Check if PR es Approved
+    with:
+      ecr_repository: springboot/product
+      runner: maven-runner
+      repository: ${{ github.repository }}
+      branch: ${{ github.ref }}
+      microservice: product
+      chart-template: springboot-chart
+    secrets: inherit 
